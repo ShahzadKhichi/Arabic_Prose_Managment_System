@@ -219,7 +219,7 @@ public class DBConnection {
     }
 
    
-    public Connection getConnection() {
+    public static Connection getConnection() {
         try {
         	
             if (connection == null || connection.isClosed()) {

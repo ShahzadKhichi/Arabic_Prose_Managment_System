@@ -5,39 +5,133 @@ package com.apms.dal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DBConnection {
 
-    // Database configuration
-    private static final String URL = "jdbc:mysql://localhost:3306/apms-database";
-    private static final String USER = "root";
-    private static final String PASSWORD = "root";
+    private static final String URL = "jdbc:mysql://sql12.freesqldatabase.com:3306/sql12802693";
+    private static final String USER = "sql12802693";
+    private static final String PASSWORD = "wwnV6D6Lkq";
 
-    // Singleton instance
+   
     private static DBConnection instance;
     private Connection connection;
 
-    // Private constructor to prevent direct instantiation
+    
     private DBConnection() {
         try {
-            // Load MySQL JDBC Driver (manual load for older JDKs)
+           
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            // Establish the connection
+          
             this.connection = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("✅ Database connection established successfully!");
+            intializeDB();
+    
 
         } catch (ClassNotFoundException e) {
+        	
             System.out.println("❌ MySQL JDBC Driver not found!");
             e.printStackTrace();
+            
         } catch (SQLException e) {
+        	
             System.out.println("❌ Failed to connect to the database!");
             e.printStackTrace();
+            
         }
+    }
+    
+    public void intializeDB()
+    {
+		    	
+		try {
+			
+	        Statement stmt=connection.createStatement();
+            
+	         // Author table
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS Author (" +
+	                    "author_id INT PRIMARY KEY AUTO_INCREMENT, " +
+	                    "name VARCHAR(255) NOT NULL, " +
+	                    "biography TEXT)");
+
+	            // Book table
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS Book (" +
+	                    "book_id INT PRIMARY KEY AUTO_INCREMENT, " +
+	                    "title VARCHAR(255) NOT NULL, " +
+	                    "author_id INT, " +
+	                    "era VARCHAR(50), " +
+	                    "FOREIGN KEY (author_id) REFERENCES Author(author_id) ON DELETE SET NULL)");
+
+	            // Prose table
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS Prose (" +
+	                    "prose_id INT PRIMARY KEY AUTO_INCREMENT, " +
+	                    "book_id INT, " +
+	                    "title VARCHAR(255), " +
+	                    "description TEXT, " +
+	                    "FOREIGN KEY (book_id) REFERENCES Book(book_id) ON DELETE SET NULL)");
+
+	            // Sentence table (updated to reference Prose)
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS Sentence (" +
+	                    "sentence_id INT PRIMARY KEY AUTO_INCREMENT, " +
+	                    "prose_id INT, " +
+	                    "sentence_number INT NOT NULL, " +
+	                    "text TEXT NOT NULL, " +
+	                    "text_diacritized TEXT, " +
+	                    "translation TEXT, " +
+	                    "notes TEXT, " +
+	                    "FOREIGN KEY (prose_id) REFERENCES Prose(prose_id) ON DELETE SET NULL)");
+
+	            // Token table (updated to reference Sentence)
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS Token (" +
+	                    "token_id INT PRIMARY KEY AUTO_INCREMENT, " +
+	                    "surface_form VARCHAR(255) NOT NULL, " +
+	                    "sentence_id INT, " +
+	                    "position INT NOT NULL, " +
+	                    "FOREIGN KEY (sentence_id) REFERENCES Sentence(sentence_id) ON DELETE SET NULL)");
+
+	            // Lemma table
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS Lemma (" +
+	                    "lemma_id INT PRIMARY KEY AUTO_INCREMENT, " +
+	                    "lemma_form VARCHAR(255) NOT NULL)");
+
+	            // Root table
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS Root (" +
+	                    "root_id INT PRIMARY KEY AUTO_INCREMENT, " +
+	                    "root_form VARCHAR(10) NOT NULL)");
+
+	            // TokenLemma table
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS TokenLemma (" +
+	                    "token_id INT, " +
+	                    "lemma_id INT, " +
+	                    "PRIMARY KEY (token_id, lemma_id), " +
+	                    "FOREIGN KEY (token_id) REFERENCES Token(token_id) ON DELETE CASCADE, " +
+	                    "FOREIGN KEY (lemma_id) REFERENCES Lemma(lemma_id) ON DELETE CASCADE)");
+
+	            // LemmaRoot table
+	            stmt.addBatch("CREATE TABLE IF NOT EXISTS LemmaRoot (" +
+	                    "lemma_id INT, " +
+	                    "root_id INT, " +
+	                    "PRIMARY KEY (lemma_id, root_id), " +
+	                    "FOREIGN KEY (lemma_id) REFERENCES Lemma(lemma_id) ON DELETE CASCADE, " +
+	                    "FOREIGN KEY (root_id) REFERENCES Root(root_id) ON DELETE CASCADE)");
+
+	            stmt.executeBatch();
+	            
+	            System.out.println("Tables created successfully or already exist.");
+	            
+	            stmt.close();
+			
+		} catch (SQLException e) {
+		
+				
+			e.printStackTrace();
+		}
     }
 
     // Public method to get the singleton instance
     public static DBConnection getInstance() {
+    	
         if (instance == null) {
             synchronized (DBConnection.class) {
                 if (instance == null) {
@@ -45,22 +139,25 @@ public class DBConnection {
                 }
             }
         }
+        
         return instance;
     }
 
-    // Public method to get the connection
+   
     public Connection getConnection() {
         try {
+        	
             if (connection == null || connection.isClosed()) {
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
             }
+            
         } catch (SQLException e) {
+        	
             e.printStackTrace();
+            
         }
         return connection;
     }
-
-    // Method to close the connection
     public void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {

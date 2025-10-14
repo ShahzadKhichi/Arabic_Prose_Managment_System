@@ -11,7 +11,6 @@ public class Launch {
 		DBConnection dbConnection=DBConnection.getInstance();
 		Connection connection=dbConnection.getConnection();
 		
-		
 	}
 
 }

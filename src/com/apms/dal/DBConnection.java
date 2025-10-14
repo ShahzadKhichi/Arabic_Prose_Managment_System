@@ -15,7 +15,7 @@ public class DBConnection {
 
    
     private static DBConnection instance;
-    private Connection connection;
+    private static Connection connection;
 
     
     private DBConnection() {
@@ -117,6 +117,81 @@ public class DBConnection {
 	                    "FOREIGN KEY (root_id) REFERENCES Root(root_id) ON DELETE CASCADE)");
 
 	            stmt.executeBatch();
+	            
+	            
+			/*
+			 * 
+			 * -- Create database
+			CREATE DATABASE IF NOT EXISTS arabic_prose_management;
+			USE arabic_prose_management;
+			
+			-- Create Author table
+			CREATE TABLE IF NOT EXISTS Author (
+			    author_id INT PRIMARY KEY AUTO_INCREMENT,
+			    name VARCHAR(255) NOT NULL,
+			    biography TEXT
+			);
+			
+			-- Create Book table
+			CREATE TABLE IF NOT EXISTS Book (
+			    book_id INT PRIMARY KEY AUTO_INCREMENT,
+			    title VARCHAR(255) NOT NULL,
+			    author_id INT,
+			    era VARCHAR(50),
+			    FOREIGN KEY (author_id) REFERENCES Author(author_id) ON DELETE SET NULL
+			);
+			
+			-- Create Sentence table
+			CREATE TABLE IF NOT EXISTS Sentence (
+			    sentence_id INT PRIMARY KEY AUTO_INCREMENT,
+			    book_id INT,
+			    sentence_number INT NOT NULL,
+			    text TEXT NOT NULL,
+			    text_diacritized TEXT,
+			    translation TEXT,
+			    notes TEXT,
+			    FOREIGN KEY (book_id) REFERENCES Book(book_id) ON DELETE SET NULL
+			);
+			
+			-- Create Token table
+			CREATE TABLE IF NOT EXISTS Token (
+			    token_id INT PRIMARY KEY AUTO_INCREMENT,
+			    surface_form VARCHAR(255) NOT NULL,
+			    sentence_id INT,
+			    position INT NOT NULL,
+			    FOREIGN KEY (sentence_id) REFERENCES Sentence(sentence_id) ON DELETE SET NULL
+			);
+			
+			-- Create Lemma table
+			CREATE TABLE IF NOT EXISTS Lemma (
+			    lemma_id INT PRIMARY KEY AUTO_INCREMENT,
+			    lemma_form VARCHAR(255) NOT NULL
+			);
+			
+			-- Create Root table
+			CREATE TABLE IF NOT EXISTS Root (
+			    root_id INT PRIMARY KEY AUTO_INCREMENT,
+			    root_form VARCHAR(10) NOT NULL
+			);
+			
+			-- Create TokenLemma table (junction table for Token and Lemma)
+			CREATE TABLE IF NOT EXISTS TokenLemma (
+			    token_id INT,
+			    lemma_id INT,
+			    PRIMARY KEY (token_id, lemma_id),
+			    FOREIGN KEY (token_id) REFERENCES Token(token_id) ON DELETE CASCADE,
+			    FOREIGN KEY (lemma_id) REFERENCES Lemma(lemma_id) ON DELETE CASCADE
+			);
+			
+			-- Create LemmaRoot table (junction table for Lemma and Root)
+			CREATE TABLE IF NOT EXISTS LemmaRoot (
+			    lemma_id INT,
+			    root_id INT,
+			    PRIMARY KEY (lemma_id, root_id),
+			    FOREIGN KEY (lemma_id) REFERENCES Lemma(lemma_id) ON DELETE CASCADE,
+			    FOREIGN KEY (root_id) REFERENCES Root(root_id) ON DELETE CASCADE
+			);
+			 * */
 	            
 	            System.out.println("Tables created successfully or already exist.");
 	            

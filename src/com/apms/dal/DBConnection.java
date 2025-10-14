@@ -15,7 +15,7 @@ public class DBConnection {
 
    
     private static DBConnection instance;
-    private Connection connection;
+    private static Connection connection;
 
     
     private DBConnection() {
@@ -144,7 +144,7 @@ public class DBConnection {
     }
 
    
-    public Connection getConnection() {
+    public static Connection getConnection() {
         try {
         	
             if (connection == null || connection.isClosed()) {

@@ -10,7 +10,7 @@ import java.sql.Statement;
 public class DBConnection {
 
 	
-	private static final String URL = "jdbc:mysql://mysql-3557f5ea-shahzadkhichi996-dfc5.d.aivencloud.com:18185/apms_d";
+	private static final String URL = "jdbc:mysql://mysql-3557f5ea-shahzadkhichi996-dfc5.d.aivencloud.com:18185/apms_db";
 	private static final String USER = "avnadmin";
 	private static final String PASSWORD = "";
 	

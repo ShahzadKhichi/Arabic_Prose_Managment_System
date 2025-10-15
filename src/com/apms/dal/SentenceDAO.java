@@ -20,14 +20,23 @@ public class SentenceDAO implements ISentenceDAO {
     @Override
     public boolean insertSentence(SentenceDTO s) {
         String sql = "INSERT INTO Sentence (prose_id, sentence_number, text, text_diacritized, translation, notes) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, s.getProseId());
             ps.setInt(2, s.getSentenceNumber());
             ps.setString(3, s.getText());
             ps.setString(4, s.getTextDiacritized());
             ps.setString(5, s.getTranslation());
             ps.setString(6, s.getNotes());
-            return ps.executeUpdate() > 0;
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        s.setSentenceId(rs.getInt(1)); // Set generated sentence_id
+                    }
+                }
+                return true;
+            }
+            return false;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

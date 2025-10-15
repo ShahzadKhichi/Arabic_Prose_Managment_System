@@ -25,12 +25,16 @@ public class TokenDAO implements ITokenDAO {
             pstmt.setInt(2, sentenceId);
             pstmt.setInt(3, position);
             int rowsAffected = pstmt.executeUpdate();
-            try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    // Token ID is auto-generated
+            if (rowsAffected > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        // Optionally return a TokenDTO if needed
+                        // return new TokenDTO(rs.getInt(1), surfaceForm, sentenceId, position);
+                    }
                 }
+                return true;
             }
-            return rowsAffected > 0;
+            return false;
         }
     }
 

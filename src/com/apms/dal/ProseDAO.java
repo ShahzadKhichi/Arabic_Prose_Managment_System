@@ -20,17 +20,25 @@ public class ProseDAO implements IProseDAO {
     @Override
     public boolean insertProse(ProseDTO prose) {
         String sql = "INSERT INTO Prose (book_id, title, description) VALUES (?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, prose.getBookId());
             ps.setString(2, prose.getTitle());
             ps.setString(3, prose.getDescription());
-            return ps.executeUpdate() > 0;
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        prose.setProseId(rs.getInt(1)); // Set generated prose_id
+                    }
+                }
+                return true;
+            }
+            return false;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
-
     @Override
     public ProseDTO getProseById(int id) {
         String sql = "SELECT * FROM Prose WHERE prose_id=?";

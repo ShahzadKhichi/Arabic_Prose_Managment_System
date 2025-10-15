@@ -22,11 +22,15 @@ public class BookDAO implements IBookDAO {
     private static final String UPDATE_BOOK = "UPDATE Book SET title = ?, author_id = ?, era = ? WHERE book_id = ?";
     private static final String DELETE_BOOK = "DELETE FROM Book WHERE book_id = ?";
 
+    private final Connection conn;
+
+    public BookDAO(Connection conn) {
+        this.conn = conn;
+    }
+
     @Override
     public boolean create(BookDTO book) throws SQLException {
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(INSERT_BOOK, Statement.RETURN_GENERATED_KEYS)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(INSERT_BOOK, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, book.getTitle());
             stmt.setInt(2, book.getAuthorId());
             stmt.setString(3, book.getEra());
@@ -48,8 +52,7 @@ public class BookDAO implements IBookDAO {
     @Override
     public List<BookDTO> readAll() throws SQLException {
         List<BookDTO> books = new ArrayList<>();
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SELECT_ALL_BOOKS);
+        try (PreparedStatement stmt = conn.prepareStatement(SELECT_ALL_BOOKS);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
@@ -67,9 +70,7 @@ public class BookDAO implements IBookDAO {
 
     @Override
     public boolean update(BookDTO book) throws SQLException {
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(UPDATE_BOOK)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(UPDATE_BOOK)) {
             stmt.setString(1, book.getTitle());
             stmt.setInt(2, book.getAuthorId());
             stmt.setString(3, book.getEra());
@@ -81,9 +82,7 @@ public class BookDAO implements IBookDAO {
 
     @Override
     public boolean delete(int bookId) throws SQLException {
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(DELETE_BOOK)) {
-             
+        try (PreparedStatement stmt = conn.prepareStatement(DELETE_BOOK)) {
             stmt.setInt(1, bookId);
             return stmt.executeUpdate() > 0;
         }

@@ -21,14 +21,17 @@ public class AuthorDAO implements IAuthorDAO {
     private static final String UPDATE_AUTHOR = "UPDATE Author SET name = ?, biography = ? WHERE author_id = ?";
     private static final String DELETE_AUTHOR = "DELETE FROM Author WHERE author_id = ?";
 
+    private final Connection conn;
+
+    public AuthorDAO(Connection conn) {
+        this.conn = conn;
+    }
+
     @Override
     public boolean create(AuthorDTO author) throws SQLException {
         // Create (Insert) a single Author record
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(INSERT_AUTHOR, Statement.RETURN_GENERATED_KEYS)) { 
-        	
-        	System.out.println( author.getName()+"    ***  "+ author.getBiography());        	
-        	
+        try (PreparedStatement stmt = conn.prepareStatement(INSERT_AUTHOR, Statement.RETURN_GENERATED_KEYS)) {
+            System.out.println(author.getName() + "    ***  " + author.getBiography());
             stmt.setString(1, author.getName());
             stmt.setString(2, author.getBiography());
 
@@ -37,7 +40,7 @@ public class AuthorDAO implements IAuthorDAO {
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         // Set the auto-generated ID back to the DTO
-                        author.setAuthorId(rs.getInt(1)); 
+                        author.setAuthorId(rs.getInt(1));
                     }
                 }
                 return true;
@@ -50,9 +53,8 @@ public class AuthorDAO implements IAuthorDAO {
     public List<AuthorDTO> readAll() throws SQLException {
         // Read (Retrieve) all Authors
         List<AuthorDTO> authors = new ArrayList<>();
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SELECT_ALL_AUTHORS);
-             ResultSet rs = stmt.executeQuery()) { 
+        try (PreparedStatement stmt = conn.prepareStatement(SELECT_ALL_AUTHORS);
+             ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 authors.add(new AuthorDTO(
@@ -68,9 +70,7 @@ public class AuthorDAO implements IAuthorDAO {
     @Override
     public boolean update(AuthorDTO author) throws SQLException {
         // Update an existing Author record
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(UPDATE_AUTHOR)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(UPDATE_AUTHOR)) {
             stmt.setString(1, author.getName());
             stmt.setString(2, author.getBiography());
             stmt.setInt(3, author.getAuthorId());
@@ -82,9 +82,7 @@ public class AuthorDAO implements IAuthorDAO {
     @Override
     public boolean delete(int authorId) throws SQLException {
         // Delete an Author record
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(DELETE_AUTHOR)) {
-             
+        try (PreparedStatement stmt = conn.prepareStatement(DELETE_AUTHOR)) {
             stmt.setInt(1, authorId);
             return stmt.executeUpdate() > 0;
         }
